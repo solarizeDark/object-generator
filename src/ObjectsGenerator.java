@@ -11,8 +11,7 @@ public class ObjectsGenerator {
 
     private static Random rand = new Random();
     private static List<Class<?>> classesToGenerate;
-    private static Map<Class<?>, RandomInRange<?>> numberGenerators;
-    private static Map<Class<?>, Function<?,?>> stringGenerators;
+    private static Map<Class<?>, Object> generators;
 
     private static RandomInRange<Integer> iRandom;
     private static RandomInRange<Double> dRandom;
@@ -23,12 +22,11 @@ public class ObjectsGenerator {
     private static Function<List<?>, ?> generatorFromList;
 
     static  {
-        numberGenerators = new HashMap<>();
-        stringGenerators = new HashMap<>();
+        generators = new HashMap<>();
 
-        numberGenerators.put(int.class, iRandom);
-        numberGenerators.put(double.class, dRandom);
-        numberGenerators.put(long.class, lRandom);
+        generators.put(int.class, iRandom);
+        generators.put(double.class, dRandom);
+        generators.put(long.class, lRandom);
 
         // fill stringGenerators
 
