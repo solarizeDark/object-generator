@@ -6,5 +6,4 @@ public class Bound<T extends Number> {
         lower = l;
         upper = u;
     }
-
 }

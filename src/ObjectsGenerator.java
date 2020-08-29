@@ -42,7 +42,9 @@ public class ObjectsGenerator {
                 length -> { Character[] arr = new Character[length];
                             IntStream.range(0, length)
                                       .forEach(x -> arr[x] = (char)(iRandom.apply((int)'a', (int)'z').intValue()));
-                            return Arrays.toString(arr);
+                            String res = Arrays.stream(arr).map(String::valueOf)
+                                                           .collect(Collectors.joining(""));
+                            return res;
                 };
 
         strGeneratorFromList = list -> list.get(iRandom.apply(0, list.size()));
@@ -76,7 +78,7 @@ public class ObjectsGenerator {
                         .collect(Collectors.toMap(Field::getName, Field::getType));
     }
 
-    public <T> List<T> generateObjects (Class<T> clazz, int amount, Map<String, Object> bounds) {
+    public <T> List<T> generateObjects (Class<T> clazz, int amount, Map<String, Object> indication) {
 
         List<T> res = new ArrayList<>();
         LongStream.range(0, amount).forEach(x -> {
@@ -94,16 +96,20 @@ public class ObjectsGenerator {
                     Class<?> type = setters.get(field).getParameterTypes()[0];
                     Object value;
                     if (type.equals(Integer.TYPE) || type.equals(Double.TYPE) || type.equals(Long.TYPE)) {
-                        value = numberGenerators.get(type).apply(((Bound<? extends Number>)bounds.get(field)).lower,
-                                ((Bound<? extends Number>)bounds.get(field)).upper);
+                        Bound<? extends Number> bound = (Bound<? extends Number>)indication.get(field);
+
+                        value = numberGenerators.get(type).apply(bound.lower, bound.upper);
                     } else {
-                        if (bounds.get(field).getClass().equals(Integer.class))
-                            value = strRandomGenerator.apply((Integer) bounds.get(field));
+                        if (indication.get(field) == null) {
+                            value = strGenerator.apply(clazz);
+                        }
 
-                        else if (bounds.get(field).getClass().equals(List.class))
-                            value = strGeneratorFromList.apply((List<?>) bounds.get(field));
+                        else if (indication.get(field).getClass().equals(Integer.class)) {
+                            value = strRandomGenerator.apply((Integer) indication.get(field));
+                        }
 
-                        else value = strGenerator.apply((Class<?>) bounds.get(field));
+                        else value = strGeneratorFromList.apply((List<?>) indication.get(field));
+
                     }
                     try {
                         setters.get(field).invoke(x, value);
